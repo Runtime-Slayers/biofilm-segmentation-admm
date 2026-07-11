@@ -34,29 +34,25 @@ To segment and solidify the biofilm structures, we formulate a multi-objective o
 
 ### 1. Objective Function
 We minimize the following objective:
-
-$$ \min_{x, z} \| x - y \|_2^2 + \mu \operatorname{TV}(x) + \lambda \sum_i x_i + \gamma \sum_i (x_i - 2(I_i - I_{\text{thresh}}))^2 + \mathbb{I}_{\mathcal{C}}(z) $$
+$$\min_{x, z} \| x - y \|_2^2 + \mu \mathrm{TV}(x) + \lambda \sum_i x_i + \gamma \sum_i (x_i - 2(I_i - I_{\text{thresh}}))^2 + \mathbb{I}_{\mathcal{C}}(z)$$
 
 subject to $x = z$, where:
-*   $y$ is the reference mask.
-*   $I$ is the intensity image, and $I_{\text{thresh}}$ is the intensity threshold.
-*   $\lambda$ is the area penalty parameter.
-*   $\operatorname{TV}(x)$ is the anisotropic Total Variation penalty for spatial smoothness.
-*   $\mathbb{I}_{\mathcal{C}}(z)$ is the indicator function enforcing area bounds:
-
-$$ \mathcal{C} = \left\{ z \;\middle|\; \text{min\_area} \le \sum_i z_i \le \text{max\_area}, \;\; 0 \le z_i \le 1 \right\} $$
+- $y$ is the reference mask.
+- $I$ is the intensity image, and $I_{\text{thresh}}$ is the intensity threshold.
+- $\lambda$ is the area penalty parameter.
+- $\mathrm{TV}(x)$ is the anisotropic Total Variation penalty for spatial smoothness.
+- $\mathbb{I}_{\mathcal{C}}(z)$ is the indicator function enforcing area bounds:
+$$\mathcal{C} = \left\lbrace z \mid \text{min area} \le \sum_i z_i \le \text{max area}, \;\; 0 \le z_i \le 1 \right\rbrace$$
 
 ### 2. ADMM Iterations
 The optimization problem is solved iteratively using the Alternating Direction Method of Multipliers:
 
 #### A. Primal $x$-Update
 Minimize the augmented Lagrangian with respect to $x$:
-
-$$ x^{k+1} = \operatorname{argmin}_{x} \left( \|x - y\|_2^2 + \frac{\rho}{2} \|x - z^k + u^k\|_2^2 + \mu \operatorname{TV}(x) + \lambda \sum_i x_i + \gamma \sum_i (x_i - 2(I_i - I_{\text{thresh}}))^2 \right) $$
+$$x^{k+1} = \arg\min_{x} \left( \|x - y\|_2^2 + \frac{\rho}{2} \|x - z^k + u^k\|_2^2 + \mu \mathrm{TV}(x) + \lambda \sum_i x_i + \gamma \sum_i (x_i - 2(I_i - I_{\text{thresh}}))^2 \right)$$
 
 This is computed analytically as:
-
-$$ x^{k+1} = \operatorname{clip}\left( \frac{2y + \rho(z^k - u^k) - \lambda - \mu \nabla \operatorname{TV}(x^k) - 2\gamma(I - I_{\text{thresh}})}{2 + \rho + \gamma}, \;\; 0, \;\; 1 \right) $$
+$$x^{k+1} = \text{clip}\left( \frac{2y + \rho(z^k - u^k) - \lambda - \mu \nabla \mathrm{TV}(x^k) - 2\gamma(I - I_{\text{thresh}})}{2 + \rho + \gamma}, \;\; 0, \;\; 1 \right)$$
 
 #### B. Primal $z$-Update (Projection)
 Project $x^{k+1} + u^k$ onto the convex set $\mathcal{C}$ enforcing area (or volume) bounds:
