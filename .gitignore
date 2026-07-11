@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IPynb checkpoints
+.ipynb_checkpoints
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Icon?
+
+# Large datasets & raw files
+biofilm_train_labelled/
+biofilm_train_labelled.zip
+final_model.h5
+final_model.weights.h5
+training_history.png
+confusion_matrix.png
+
+# Exclude academic paper/manuscript drafts and reference folders
+ADMM_RP/
+BIOFILM_Journal_Related/
+Personal_Neelash_sir_Jornal/
+PPT/
+*.pdf
+
+# Exclude original unorganized notebooks at root
+/Biofilm_last_segment_final.ipynb
+/biofilm-4_train.ipynb
+
