@@ -31,24 +31,25 @@ To segment and solidify the biofilm structures, we formulate a multi-objective o
 
 ### 1. Objective Function
 We minimize the following objective:
-$$\min_{x, z} \| x - y \|_2^2 + \mu \operatorname{TV}(x) + \gamma \| x - I_{\text{thresh}} \|_2^2 + \mathbb{I}_{\mathcal{C}}(z)$$
+$$\min_{x, z} \| x - y \|_2^2 + \mu \operatorname{TV}(x) + \lambda \sum_i x_i + \gamma \sum_i (x_i - 2(I_i - I_{\text{thresh}}))^2 + \mathbb{I}_{\mathcal{C}}(z)$$
 
 subject to $x = z$, where:
-- $y$ is the raw input mask.
-- $I_{\text{thresh}}$ represents intensity penalty constraints.
+- $y$ is the reference mask.
+- $I$ is the intensity image, and $I_{\text{thresh}}$ is the intensity threshold.
+- $\lambda$ is the area penalty parameter.
 - $\operatorname{TV}(x)$ is the anisotropic Total Variation penalty for spatial smoothness.
 - $\mathbb{I}_{\mathcal{C}}(z)$ is the indicator function enforcing area bounds:
-$$\mathcal{C} = \left\{ z \;\middle|\; \text{min\_area} \le \sum z \le \text{max\_area}, \;\; 0 \le z_i \le 1 \right\}$$
+$$\mathcal{C} = \left\{ z \;\middle|\; \text{min\_area} \le \sum_i z_i \le \text{max\_area}, \;\; 0 \le z_i \le 1 \right\}$$
 
 ### 2. ADMM Iterations
 The optimization problem is solved iteratively using the Alternating Direction Method of Multipliers:
 
 #### A. Primal $x$-Update
 Minimize the augmented Lagrangian with respect to $x$:
-$$x^{k+1} = \operatorname{argmin}_{x} \left( \|x - y\|_2^2 + \frac{\rho}{2} \|x - z^k + u^k\|_2^2 + \mu \operatorname{TV}(x) + \gamma \|x - I_{\text{thresh}}\|_2^2 \right)$$
+$$x^{k+1} = \operatorname{argmin}_{x} \left( \|x - y\|_2^2 + \frac{\rho}{2} \|x - z^k + u^k\|_2^2 + \mu \operatorname{TV}(x) + \lambda \sum_i x_i + \gamma \sum_i (x_i - 2(I_i - I_{\text{thresh}}))^2 \right)$$
 
 This is computed analytically as:
-$$x^{k+1} = \operatorname{clip}\left( \frac{2y + \rho(z^k - u^k) - \lambda - \mu \nabla \operatorname{TV}(x^k) - \text{intensity\_penalty}}{2 + \rho + \gamma}, \;\; 0, \;\; 1 \right)$$
+$$x^{k+1} = \operatorname{clip}\left( \frac{2y + \rho(z^k - u^k) - \lambda - \mu \nabla \operatorname{TV}(x^k) - 2\gamma(I - I_{\text{thresh}})}{2 + \rho + \gamma}, \;\; 0, \;\; 1 \right)$$
 
 #### B. Primal $z$-Update (Projection)
 Project $x^{k+1} + u^k$ onto the convex set $\mathcal{C}$ enforcing area (or volume) bounds:
@@ -65,9 +66,6 @@ $$u^{k+1} = u^k + x^{k+1} - z^{k+1}$$
 ## 📂 Repository Structure
 
 ```
-├── .github/
-│   └── workflows/
-│       └── lint.yml         # CI workflow for Ruff syntax linting
 ├── .gitignore             # Git ignore file (excludes datasets, models, manuscripts)
 ├── LICENSE                # MIT License
 ├── README.md              # Project documentation
@@ -77,7 +75,7 @@ $$u^{k+1} = u^k + x^{k+1} - z^{k+1}$$
 ├── notebooks/             # Step-by-step experiment notebooks
 │   ├── biofilm_classifier_efficientnet.ipynb       # Deep Learning Classification workflow
 │   └── biofilm_segmentation_and_solidification.ipynb # Preprocessing, Segmentation, and ADMM Solidification
-└── src/                     # Core Python modules
+└── biofilm_admm/          # Core Python modules
     ├── __init__.py          # Exposes package API
     ├── admm_segmentation.py # NumPy implementations of 2D/3D ADMM
     ├── classifier.py        # Model build and weights calculation helpers
@@ -93,7 +91,7 @@ You can install this package in editable mode locally:
 ```bash
 pip install -e .
 ```
-This automatically links the `src/` modules so you can import them anywhere on your system.
+This automatically links the `biofilm_admm/` modules so you can import them anywhere on your system.
 
 For deep learning packages like PyTorch and TensorFlow, install them separately based on your GPU capabilities:
 ```bash
