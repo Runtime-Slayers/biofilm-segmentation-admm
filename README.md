@@ -112,7 +112,7 @@ The optimization problem is solved iteratively using the Alternating Direction M
 
 #### A. Primal $x$-Update
 Minimize the augmented Lagrangian with respect to $x$:
-$$x^{k+1} = \arg\min_{x} \left( \|x - y\|_2^2 + \frac{\rho}{2} \|x - z^k + u^k\|_2^2 + \mu \mathrm{TV}(x) + \lambda \sum_i x_i + \gamma \sum_i 
+$$x^{k+1} = \arg\min_{x} \left( \|x - y\|_2^2 + \frac{\rho}{2} \|x - z^k + u^k\|_2^2 + \mu \mathrm{TV}(x) 
 
 This is computed analytically as:
 $$x^{k+1} = \text{clip}\left( \frac{2y + \rho(z^k - u^k) - \lambda - \mu \nabla \mathrm{TV}(x^k) - 2\gamma(I - I_{\text{thresh}})}{2 + \rho + \gamma} \; 0 \; 1 \right)$$
